@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from whitelabel import views as whitelabel_views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'$', whitelabel_views.index),
 ]
