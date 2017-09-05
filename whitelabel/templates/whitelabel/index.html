@@ -23,6 +23,8 @@
 {% bootstrap_messages %}
   {% if request.user.is_authenticated %}
     Welcome {{ request.user.username }}
+    {% load static %}
+    <img src="{% static 'img/photo.jpg' %}" alt="buildings">
   {% endif %}
 {# Display a form #}
 <form action="/url/to/submit/" method="post" class="form">
