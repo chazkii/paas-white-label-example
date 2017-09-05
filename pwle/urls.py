@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from whitelabel import views as whitelabel_views
 
 urlpatterns = [
-    url(r'^admin/$', admin.site.urls),
+    url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.login),
     url(r'^logout/$', auth_views.logout),
     url(r'$', whitelabel_views.index),
