@@ -1,5 +1,5 @@
-from django.contrib import admin
+from pwle.admin import admin_site
 from .models import CompanyStyle
 
 # Register your models here.
-admin.site.register(CompanyStyle)
+admin_site.register(CompanyStyle)

@@ -14,14 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url
-from django.contrib import admin
+from pwle.admin import admin_site
 from django.contrib.auth import views as auth_views
 from whitelabel import views as whitelabel_views
 from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    url(r'^admin/', admin_site.urls),
     url(r'^login/$', auth_views.login),
     url(r'^logout/$', auth_views.logout),
     url(r'$', whitelabel_views.index),
