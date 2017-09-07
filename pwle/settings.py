@@ -23,9 +23,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '*8c@tcdvy+x4^a1!v79**7ajd9k*&@cdilm^()m(b8ar2=ky#-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG') != 'FALSE'
 
-ALLOWED_HOSTS = []
+if DEBUG:
+    SECRET_KEY = '0gy83%zd5^*+(f*@#%$2aos!=6qq&!(e!dfczz^hxsh_&fm87y'
+else:
+    SECRET_KEY = os.getenv("SECRET_KEY")
+
+if DEBUG:
+    ALLOWED_HOSTS = ['*']
+else:
+    ALLOWED_HOSTS = ["paas-white-label-example.azurewebsites.net"]
 
 
 # Application definition
