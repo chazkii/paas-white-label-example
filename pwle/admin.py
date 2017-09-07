@@ -21,6 +21,7 @@ class PWLEAdmin(AdminSite):
             'available_apps': self.get_app_list(request),
         }
 
+
 admin_site = PWLEAdmin(name='admin')
 admin_site.register(User)
 admin_site.register(Group)

@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^admin/', admin_site.urls),
     url(r'^login/$', auth_views.login),
     url(r'^logout/$', auth_views.logout),
+    url(r'^signup/([0-9])/$', auth_views.logout),
     url(r'$', whitelabel_views.index),
     # https://docs.djangoproject.com/en/1.11/howto/static-files/#serving-static-files-during-development
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
