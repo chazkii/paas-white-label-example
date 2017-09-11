@@ -24,7 +24,7 @@ class CompanyAdmin(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    uiud = models.UUIDField(default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     company = models.ForeignKey(Company, null=True, related_name='+')
     is_verified = models.BooleanField(default=False)
 

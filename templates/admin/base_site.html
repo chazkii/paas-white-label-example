@@ -5,13 +5,15 @@
 
 {% block extrastyle %}
   {{ block.super }}
+  {% if request.user.is_authenticated %}
   {% with 'css/'|add:request.user.profile.company.name|add:'-extra.css' as company_css %}
   <link rel="stylesheet" type="text/css" href="{% static company_css %}" />
   {% endwith %}
+  {% endif %}
 {% endblock %}
 
 {% block branding %}
-<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></h1>
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('PaaS admin') }}</a></h1>
 {% endblock %}
 
 {% block nav-global %}{% endblock %}

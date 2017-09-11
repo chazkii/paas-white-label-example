@@ -1,2 +1,4 @@
 django==1.11.3
 django-bootstrap3==9.0.0
+sendgrid-django==4.0.4
+django-mailgun==0.9.1

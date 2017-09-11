@@ -1,11 +1,13 @@
 from functools import lru_cache
 
-from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import Group
+from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponseNotAllowed
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
 
-from whitelabel.models import Profile
+from whitelabel.models import Profile, Company, CompanyAdmin
+from whitelabel.forms import SignUpForm
 
 
 def index(request):
@@ -20,7 +22,9 @@ def index(request):
 
 def signup(request, company_id):
     # https://simpleisbetterthancomplex.com/tutorial/2017/02/18/how-to-create-user-sign-up-view.html
-    company = Group.objects.get(id=company_id)
+    if request.user.is_authenticated:
+        return redirect('home')
+    company = Company.objects.get(id=company_id)
     company_name = company.name
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -29,11 +33,31 @@ def signup(request, company_id):
             user.refresh_from_db()
             user.profile.company = company
             user.save()
-            username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            # user = authenticate(username=username, password=raw_password)
-            # login(request, user)
-            return redirect('home')
+            company_admins = CompanyAdmin.objects.filter(company=company).all()
+            admins = [u.user for u in company_admins]
+            confirm_link = 'http:// %s/confirm/%s/' % (request.get_host(), user.profile.uuid)
+            # import ipdb
+            # ipdb.set_trace()
+            for a in admins:
+                params = {
+                    'admin': a,
+                    'new_user': user,
+                    'company': company,
+                    'confirm_link': confirm_link
+                }
+                plain = render_to_string('emails/admin/new-user.txt', params)
+                html = render_to_string('emails/admin/new-user.html', params)
+                print('Sending a confirm accout email for "%s" to "%s"' % (user.username, a.email))
+                send_mail(
+                    'New registration email',
+                    plain,
+                    # 'no-reply@outbound.sendgrid.net',
+                    'Charlie Smith <charlie@pensolve.com>',
+                    [a.email],
+                    html_message=html
+                )
+
+            return redirect('success')
     else:
         form = UserCreationForm()
     return render(request, 'signup.html', {'form': form, 'company_name': company_name})
