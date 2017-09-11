@@ -1,0 +1,7 @@
+Hi {{ email }},
+
+Your account has been approved by an admin at the company. Please navigate to {{ login_link }} to login.
+
+Thanks,
+
+paas-whitelabel-example
