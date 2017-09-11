@@ -4,11 +4,9 @@
 {% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
 
 {% block extrastyle %}
-  {{ block.super }}A
-  {% with request.user.groups.all as groups %}
-  {% with 'css/'|add:groups.0.name|add:'-extra.css' as company_css %}
+  {{ block.super }}
+  {% with 'css/'|add:request.user.profile.company.name|add:'-extra.css' as company_css %}
   <link rel="stylesheet" type="text/css" href="{% static company_css %}" />
-  {% endwith %}
   {% endwith %}
 {% endblock %}
 
