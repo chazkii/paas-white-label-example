@@ -1,6 +1,6 @@
 Hi {{ admin.name }},
 
-A new user with email {{ new_user.email }} has attempted to register a new account ffor company {{ company.name }}.
+A new user with email {{ new_user.email }} has attempted to register a new account for company {{ company.name }}.
 If this is a valid transaction, please confirm the new account by clicking this link {{ confirm_link }}
 
 Thanks,

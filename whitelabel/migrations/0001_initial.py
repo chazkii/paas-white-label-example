@@ -38,7 +38,6 @@ class Migration(migrations.Migration):
             fields=[
                 ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to=settings.AUTH_USER_MODEL)),
                 ('uuid', models.UUIDField(default=uuid.uuid4, editable=False)),
-                ('is_verified', models.BooleanField(default=False)),
                 ('company', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='whitelabel.Company')),
             ],
         ),

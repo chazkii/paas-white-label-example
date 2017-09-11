@@ -35,6 +35,8 @@ class Command(BaseCommand):
         u2, _ = User.objects.update_or_create(first_name="Bob",
                                               last_name="Smith",
                                               username='bsmith',
+                                              is_superuser=False,
+                                              is_staff=False,
                                               email=email)
         u2.set_password('password')
         u2.save()
