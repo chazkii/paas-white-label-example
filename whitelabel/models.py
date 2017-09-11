@@ -1,9 +1,40 @@
+import uuid
+
 from django.db import models
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import User, Group
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
-# Create your models here.
+
+class Company(models.Model):
+    name = models.CharField(max_length=256)
+    uiud = models.UUIDField(default=uuid.uuid4, editable=False)
+
+    def __str__(self):
+        return self.name
 
 
-class CompanyStyle(models.Model):
-    user_group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    background_color_hex = models.CharField(default="#ffffff", max_length=7)
+class CompanyAdmin(models.Model):
+    company = models.ForeignKey(Company, related_name='+')
+    user = models.ForeignKey(User, related_name='+')
+
+    def __str__(self):
+        return "%s : %s" % (self.user.username, self.company.name)
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    uiud = models.UUIDField(default=uuid.uuid4, editable=False)
+    company = models.ForeignKey(Company, null=True, related_name='+')
+    is_verified = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "%s <%s>" % (self.user.username, self.user.email)
+
+
+@receiver(post_save, sender=User)
+def update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+    instance.profile.save()
+

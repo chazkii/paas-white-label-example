@@ -1,5 +1,7 @@
 from pwle.admin import admin_site
-from .models import CompanyStyle
 
-# Register your models here.
-admin_site.register(CompanyStyle)
+from whitelabel.models import Profile, CompanyAdmin
+
+
+admin_site.register(Profile)
+admin_site.register(CompanyAdmin)

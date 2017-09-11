@@ -9,9 +9,12 @@ class PWLEAdmin(AdminSite):
         script_name = request.META['SCRIPT_NAME']
         site_url = script_name if self.site_url == '/' and script_name else self.site_url
 
-        # simply fetch user here and customize 
-        group_name = request.user.groups.all()[0].name
-        site_title = "%s admin" % group_name
+        # simply fetch user here and customize
+        if request.user.is_authenticated:
+            company_name = request.user.profile.company.name
+            site_title = "%s admin" % company_name
+        else:
+            site_title = 'PaaS admin panel'
 
         return {
             'site_title': site_title,

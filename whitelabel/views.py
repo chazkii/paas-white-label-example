@@ -1,44 +1,55 @@
 from functools import lru_cache
 
-from django.shortcuts import render
-from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import Group
+from django.http import HttpResponseNotAllowed
 
-from whitelabel.models import CompanyStyle
-
-
-@lru_cache(maxsize=64)
-def get_bg_color_from_group(group_id):
-    return CompanyStyle.objects.filter(user_group=group_id).first().background_color_hex
+from whitelabel.models import Profile
 
 
 def index(request):
-    group = request.user.groups.all()[0].id
-    bg_color = get_bg_color_from_group(group)
     return render(
         request,
         'whitelabel/index.html',
         {
-            "background_color": bg_color
+            "background_color": '#000000'
         }
     )
 
 
 def signup(request, company_id):
     # https://simpleisbetterthancomplex.com/tutorial/2017/02/18/how-to-create-user-sign-up-view.html
-    company = Group.get(company_id)
+    company = Group.objects.get(id=company_id)
     company_name = company.name
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            user.refresh_from_db()
+            user.profile.company = company
+            user.save()
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
-            login(request, user)
+            # user = authenticate(username=username, password=raw_password)
+            # login(request, user)
             return redirect('home')
     else:
         form = UserCreationForm()
     return render(request, 'signup.html', {'form': form, 'company_name': company_name})
+
+
+def confirm_new_account(request, user_uuid):
+    if not request.user.is_authenticated:
+        redirect('login')
+    new_user_profile = Profile.objects.get(uuid=user_uuid)
+    if request.user.profile.company_id != new_user_profile.company_id:
+        raise HttpResponseNotAllowed
+    new_user_profile.is_verified = True
+    new_user_profile.save()
+    return render(request, 'success.html')
+
+
+def success(request):
+    return render(request, 'success.html')
+

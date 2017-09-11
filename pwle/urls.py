@@ -20,11 +20,16 @@ from whitelabel import views as whitelabel_views
 from django.conf.urls.static import static
 from django.conf import settings
 
+# https://stackoverflow.com/questions/11384589/what-is-the-correct-regex-for-matching-values-generated-by-uuid-uuid4-hex
+UUID4_REGEX = r'[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}'
+
 urlpatterns = [
     url(r'^admin/', admin_site.urls),
     url(r'^login/$', auth_views.login),
     url(r'^logout/$', auth_views.logout),
-    url(r'^signup/([0-9])/$', auth_views.logout),
+    url(r'^signup/([0-9])/$', whitelabel_views.signup),
+    url(r'^signup/([0-9])/$', whitelabel_views.signup),
+    url(r'^confirm/%s$' % UUID4_REGEX, whitelabel_views.confirm_new_account),
     url(r'$', whitelabel_views.index),
     # https://docs.djangoproject.com/en/1.11/howto/static-files/#serving-static-files-during-development
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
