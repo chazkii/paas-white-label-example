@@ -1,12 +1,12 @@
 from functools import lru_cache
 
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponseForbidden
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 
 from whitelabel.models import Profile, Company, CompanyAdmin
+from whitelabel.forms import SignUpForm
 
 
 def index(request):
@@ -26,7 +26,7 @@ def signup(request, company_id):
     company = Company.objects.get(id=company_id)
     company_name = company.name
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
             user.refresh_from_db()
@@ -57,7 +57,7 @@ def signup(request, company_id):
 
             return redirect('success')
     else:
-        form = UserCreationForm()
+        form = SignUpForm()
     return render(request, 'signup.html', {'form': form, 'company_name': company_name})
 
 
