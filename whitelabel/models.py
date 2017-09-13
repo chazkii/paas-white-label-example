@@ -14,6 +14,7 @@ class Company(models.Model):
         return self.name
 
 
+# This model allows for multiple admins per company
 class CompanyAdmin(models.Model):
     company = models.ForeignKey(Company, related_name='+')
     user = models.ForeignKey(User, related_name='+')
@@ -22,6 +23,9 @@ class CompanyAdmin(models.Model):
         return "%s : %s" % (self.user.username, self.company.name)
 
 
+# We create a profile model as a non-invasive way of extending the default
+# User model. More mentioned in the official docs here:
+# https://docs.djangoproject.com/en/1.11/topics/auth/customizing/#extending-the-existing-user-model
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
@@ -31,6 +35,8 @@ class Profile(models.Model):
         return "%s <%s>" % (self.user.username, self.user.email)
 
 
+# Leverages [Django signals](https://docs.djangoproject.com/en/1.11/topics/signals)
+# to automatically create a profile instance everytime a user instance is created.
 @receiver(post_save, sender=User)
 def update_user_profile(sender, instance, created, **kwargs):
     if created:

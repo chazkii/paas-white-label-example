@@ -27,7 +27,7 @@ urlpatterns = [
     url(r'^admin/', admin_site.urls),
     url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
     url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
-    url(r'^signup/([0-9])/$', whitelabel_views.signup),
+    url(r'^signup/%s/$' % UUID4_REGEX, whitelabel_views.signup),
     url(r'^success/$', whitelabel_views.success, name='success'),
     url(r'^approve/%s/$' % UUID4_REGEX, whitelabel_views.approve_new_account),
     url(r'$', whitelabel_views.index, name='home'),

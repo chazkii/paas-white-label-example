@@ -19,11 +19,11 @@ def index(request):
     )
 
 
-def signup(request, company_id):
+def signup(request, company_uuid):
     # https://simpleisbetterthancomplex.com/tutorial/2017/02/18/how-to-create-user-sign-up-view.html
     if request.user.is_authenticated:
         return redirect('home')
-    company = Company.objects.get(id=company_id)
+    company = Company.objects.get(uuid=company_uuid)
     company_name = company.name
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -49,7 +49,6 @@ def signup(request, company_id):
                 send_mail(
                     'A new account needs to be approved',
                     plain,
-                    # 'no-reply@outbound.sendgrid.net',
                     'Charlie Smith <charlie@pensolve.com>',
                     [a.email],
                     html_message=html
@@ -66,6 +65,7 @@ def approve_new_account(request, user_uuid):
         return redirect('login')
     new_user_profile = Profile.objects.get(uuid=user_uuid)
     new_user_email = new_user_profile.user.email
+    # prevent anonymous and normal users from approving
     if request.user.profile.company_id != new_user_profile.company_id \
             or not request.user.is_superuser:
         return HttpResponseForbidden('Forbidden')
@@ -80,7 +80,6 @@ def approve_new_account(request, user_uuid):
     send_mail(
         'Your new account is ready to use',
         plain,
-        # 'no-reply@outbound.sendgrid.net',
         'Charlie Smith <charlie@pensolve.com>',
         [new_user_email],
         html_message=html
