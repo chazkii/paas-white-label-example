@@ -7,7 +7,8 @@
 
 ## Preparation
 
-The app name will be `whitelabel`
+* You have an existing Django project
+* Create a new Django app called `whitelabel` with `python manage.py startapp whitelabel`
 
 ### Emailing
 
@@ -77,9 +78,10 @@ def update_user_profile(sender, instance, created, **kwargs):
 ```
 
 You may notice that we did not create any field for approval. This is because the default Django 
-user model has the `is_active` field that we will use.
+user model has the `is_active` field that we will use. As we are not creating any more models, 
+we can run `python manage.py makemigrations` to generate an initial migration.
 
-Let's look at our routing next
+Let's look at our routing next.
 
 `whitelabel/urls.py`
 ```python
@@ -153,8 +155,7 @@ def signup(request, company_uuid):
                 send_mail(
                     'A new account needs to be approved',
                     plain,
-                    # 'no-reply@outbound.sendgrid.net',
-                    'Charlie Smith <charlie@pensolve.com>',
+                    'Charlie Smith <charlie@chuckus.nz>',
                     [a.email],
                     html_message=html
                 )
@@ -184,7 +185,7 @@ def approve_new_account(request, user_uuid):
     send_mail(
         'Your new account is ready to use',
         plain,
-        'Charlie Smith <charlie@pensolve.com>',
+        'Charlie Smith <charlie@chuckus.nz>',
         [new_user_email],
         html_message=html
     )
@@ -194,13 +195,93 @@ def approve_new_account(request, user_uuid):
 def success(request):
     return render(request, 'success.html')
 ```
- 
+
+Each view is pretty self-explanatory. For the `/signup` and `/approve`, we are simply doing 
+database operations to save or get data, using the data as params to the template renderers, 
+then sending emails, and returning a render response to display in the browser.
+
 Things to note:
+
+* Templates can be fetched from the repo [here](https://github.com/chuckus/paas-white-label-example/tree/master/templates).
+  Copy these to `whitelabel/templates`.
 
 * Django does not offer any view module for signing up/creating a user, but does offer a form for 
   creating a user called [UserCreationForm](https://docs.djangoproject.com/en/1.8/topics/auth/default/#django.contrib.auth.forms.UserCreationForm).
-  But this form
-  `whitelabel/forms.py`
-  ```python
+  But this form only requires password and username. We need an email to send emails to. So we extend it as follows:
   
-  ```
+  
+`whitelabel/forms.py`
+```python
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+
+
+class SignUpForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'email', 'password1', 'password2',)
+```
+
+Django will automatically add those extra fields to the form.
+
+### Testing
+
+First, we want to make it easy to test by reducing the number of manual steps. 
+We do this by writing a script that autopopulates the database. But how do we 
+execute the script in (one of) the Django way(s)? 
+By adding [`django-admin commands`](https://docs.djangoproject.com/en/1.11/howto/custom-management-commands/)
+
+`whitelabel/management/commands/populate.py`
+```python
+from django.core.management.base import BaseCommand
+from django.contrib.auth.models import User
+from whitelabel.models import Company, CompanyAdmin
+
+
+class Command(BaseCommand):
+    help = "Populate database with test data"
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--email',
+            type=str,
+            default=False,
+            help="Email to save to all users",
+            required=True
+        )
+
+    def handle(self, *args, **options):
+        email = options['email']
+        c, _ = Company.objects.update_or_create(name="Acme")
+        u1, _ = User.objects.update_or_create(first_name="Adam",
+                                              last_name="Smith",
+                                              username='asmith',
+                                              is_superuser=True,
+                                              is_staff=True,
+                                              email=email)
+        u1.set_password('password')
+        u1.save()
+        u1.refresh_from_db()
+        u1.profile.company = c
+        u1.save()
+
+        CompanyAdmin.objects.update_or_create(user=u1, company=c)
+
+        u2, _ = User.objects.update_or_create(first_name="Bob",
+                                              last_name="Smith",
+                                              username='bsmith',
+                                              is_superuser=False,
+                                              is_staff=False,
+                                              email=email)
+        u2.set_password('password')
+        u2.save()
+        u2.refresh_from_db()
+        u2.profile.company = c
+        u2.save()
+        print('Added users "asmith" (admin) and "bsmith" with password "password"')
+```
+
+Now we can simply run `python manage.py populate --email <your target email>` to populate the tables.
+(make sure you have run `python manage.py migrate` to create the tables)
+
+To test locally, simply use `python manage.py runserver`.
