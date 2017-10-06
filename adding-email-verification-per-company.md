@@ -1,7 +1,7 @@
 # Adding email verification per company
 
 ## Caveats
-* While user registration is done on a per company basis, administration 
+* While user registration is done on a per company basis, administration
   rights of a company admin gives permission to modify the entire database.
   So not production ready.
 
@@ -12,7 +12,7 @@
 
 ### Emailing
 
-1. Sign up for an emailing service. Best I have found so far is [mailgun](http://mailgun.com) 
+1. Sign up for an emailing service. Best I have found so far is [mailgun](http://mailgun.com)
    as its sandbox offering is performant enough to test the functionality to be implemented.
 2. Follow [django-mailgun - Getting going](https://github.com/bradwhittington/django-mailgun/#getting-going)
    instructions.
@@ -77,13 +77,13 @@ def update_user_profile(sender, instance, created, **kwargs):
     instance.profile.save()
 ```
 
-You may notice that we did not create any field for approval. This is because the default Django 
-user model has the `is_active` field that we will use. As we are not creating any more models, 
+You may notice that we did not create any field for approval. This is because the default Django
+user model has the `is_active` field that we will use. As we are not creating any more models,
 we can run `python manage.py makemigrations` to generate an initial migration.
 
 Let's look at our routing next.
 
-`whitelabel/urls.py`
+`<project_name>/urls.py`
 ```python
 from django.conf.urls import url
 from pwle.admin import admin_site
@@ -101,7 +101,7 @@ urlpatterns = [
     url(r'^signup/%s/$' % UUID4_REGEX, whitelabel_views.signup),
     url(r'^approve/%s/$' % UUID4_REGEX, whitelabel_views.approve_new_account),
     url(r'$', whitelabel_views.index, name='home'),
-] 
+]
 ```
 
 Main things to note here are:
@@ -110,10 +110,10 @@ Main things to note here are:
 * `approve/<user_uuid>` - HTTP method to approve an account - better than manually doing it in admin panel.
 * `UUID4_REGEX` - never use primary keys (at least SQL styled ones) as url entry/query params as
   it is a security hole. Primary key usage means an attacker can simply cycle through integers.
-  
+
 Lastly on to the views. We will look at the views one by one in `whitelabel/views.py`:
 
-   
+
 ```python
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
@@ -196,8 +196,8 @@ def success(request):
     return render(request, 'success.html')
 ```
 
-Each view is pretty self-explanatory. For the `/signup` and `/approve`, we are simply doing 
-database operations to save or get data, using the data as params to the template renderers, 
+Each view is pretty self-explanatory. For the `/signup` and `/approve`, we are simply doing
+database operations to save or get data, using the data as params to the template renderers,
 then sending emails, and returning a render response to display in the browser.
 
 Things to note:
@@ -205,11 +205,11 @@ Things to note:
 * Templates can be fetched from the repo [here](https://github.com/chuckus/paas-white-label-example/tree/master/templates).
   Copy these to `whitelabel/templates`.
 
-* Django does not offer any view module for signing up/creating a user, but does offer a form for 
+* Django does not offer any view module for signing up/creating a user, but does offer a form for
   creating a user called [UserCreationForm](https://docs.djangoproject.com/en/1.8/topics/auth/default/#django.contrib.auth.forms.UserCreationForm).
   But this form only requires password and username. We need an email to send emails to. So we extend it as follows:
-  
-  
+
+
 `whitelabel/forms.py`
 ```python
 from django.contrib.auth.forms import UserCreationForm
@@ -226,9 +226,9 @@ Django will automatically add those extra fields to the form.
 
 ### Testing
 
-First, we want to make it easy to test by reducing the number of manual steps. 
-We do this by writing a script that autopopulates the database. But how do we 
-execute the script in (one of) the Django way(s)? 
+First, we want to make it easy to test by reducing the number of manual steps.
+We do this by writing a script that autopopulates the database. But how do we
+execute the script in (one of) the Django way(s)?
 By adding [`django-admin commands`](https://docs.djangoproject.com/en/1.11/howto/custom-management-commands/)
 
 `whitelabel/management/commands/populate.py`
